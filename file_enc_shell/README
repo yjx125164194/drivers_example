@@ -1,0 +1,12 @@
+1.use for openssl enc/dec to protect source
+
+2.usage
+
+2.1
+shell:openssl enc -e -aes256 -in source.c -out source.enc
+2.2
+enter passwd
+2.3
+cat source.enc >> make.sh
+2.4
+./make.sh
