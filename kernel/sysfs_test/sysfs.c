@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: SimPL-2.0
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/device.h>
@@ -8,38 +9,38 @@
 #include <linux/types.h>
 #include <linux/io.h>
 
-typedef struct {
-    int num;
-}hello_priv;
+struct hello_priv {
+	int num;
+};
 
-static ssize_t hello_set_example(struct device *dev,struct device_attribute *attr,const char *buf, size_t count)
+static ssize_t example_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-	hello_priv* prv = dev_get_drvdata(dev);
-	
-	printk(KERN_NOTICE "sysfs: %s\n",__FUNCTION__); 
-	
+	struct hello_priv *prv = dev_get_drvdata(dev);
+
+	pr_notice("sysfs: %s\n", __func__);
+
 	prv->num = buf[0];
-	printk(KERN_NOTICE"sysfs_write:buf=%s, prv->num=%d",buf, prv->num); 
-	
+	pr_notice("sysfs_write:buf=%s, prv->num=%d", buf, prv->num);
+
 	return count;
 }
 
-static ssize_t hello_get_example(struct device *dev,struct device_attribute *attr,char *buf)
+static ssize_t example_show(struct device *dev, struct device_attribute *attr, char *buf)
 {
-	hello_priv *prv = dev_get_drvdata(dev);
-	
-	printk(KERN_NOTICE "sysfs: %s\n",__FUNCTION__); 
-	
+	struct hello_priv *prv = dev_get_drvdata(dev);
+
+	pr_notice("sysfs: %s\n", __func__);
+
 	buf[0] = prv->num;
-	printk(KERN_NOTICE"sysfs_read :buf=%s, prv->num=%d",buf, prv->num); 
+	pr_notice("sysfs_read :buf=%s, prv->num=%d", buf, prv->num);
 
 	return 1;
 }
 
-static DEVICE_ATTR(example, S_IRUGO | S_IWUSR,hello_get_example, hello_set_example);
+static DEVICE_ATTR(example, 0644, example_show, example_store);
 
 static struct attribute *hello_attributes[] = {
-	&dev_attr_example.attr,          //dev_attr_****.attr中间的××××必须与DEVICE_ATTR中的名称对应
+	&dev_attr_example.attr,		//dev_attr_****.attr中间的××××必须与DEVICE_ATTR中的名称对应
 	NULL
 };
 
@@ -50,29 +51,27 @@ static const struct attribute_group hello_attr_group = {
 static int hello_probe(struct platform_device *pdev)
 {
 	int rc;
-	hello_priv* prv;
+	struct hello_priv *prv;
 
-	printk(KERN_NOTICE "sysfs: %s\n",__FUNCTION__); 
-	
-	prv = devm_kzalloc(&pdev->dev, sizeof(hello_priv), GFP_KERNEL);
-	if (!prv) {
-		dev_err(&pdev->dev, "failed to allocate hello\n");
-        	return -ENOMEM;
-    	}
+	pr_notice("sysfs: %s\n", __func__);
 
-    	prv->num = 2;
+	prv = devm_kzalloc(&pdev->dev, sizeof(struct hello_priv), GFP_KERNEL);
+	if (!prv)
+		return -ENOMEM;
 
-    	platform_set_drvdata(pdev,prv);
+	prv->num = 2;
 
-    	rc = sysfs_create_group(&pdev->dev.kobj, &hello_attr_group);
-    	if (rc) {
-		dev_err(&pdev->dev,"failed to create hello sysfs group\n");
+	platform_set_drvdata(pdev, prv);
+
+	rc = sysfs_create_group(&pdev->dev.kobj, &hello_attr_group);
+	if (rc) {
+		dev_err(&pdev->dev, "failed to create hello sysfs group\n");
 		goto fail;
-   	 }
+	}
 
-   	return 0;
+	return 0;
 fail:
-    	return rc;
+	return rc;
 }
 
 static int hello_remove(struct platform_device *pdev)
@@ -83,11 +82,10 @@ static int hello_remove(struct platform_device *pdev)
 }
 
 struct platform_driver hello_driver = {
-    	.driver = {
+	.driver = {
 		.name = "hello_dev",
- 		.owner = THIS_MODULE,
-    	},
-    	.probe = hello_probe,
+	},
+	.probe = hello_probe,
 	.remove = hello_remove,
 };
 
@@ -97,17 +95,18 @@ static int __init hello_init(void)
 {
 	int ret;
 
-	printk(KERN_NOTICE "sysfs: %s\n",__FUNCTION__); 
-	
-	hello_device = platform_device_alloc("hello_dev",-1);
-	if(!hello_device){
-		printk(KERN_NOTICE "sysfs: %s:%s[%d]: error", __FILE__,__FUNCTION__, __LINE__); 
+	pr_notice("sysfs: %s\n", __func__);
+
+	hello_device = platform_device_alloc("hello_dev", -1);
+	if (!hello_device) {
+		pr_notice("sysfs: %s:%s[%d]: error", __FILE__, __func__, __LINE__);
 		return -ENOMEM;
 	}
 
 	ret = platform_device_add(hello_device);
-    	if (ret != 0){
-		printk(KERN_NOTICE "sysfs: %s:%s[%d]: error", __FILE__,__FUNCTION__, __LINE__); 
+
+	if (ret != 0) {
+		pr_notice("sysfs: %s:%s[%d]: error", __FILE__, __func__, __LINE__);
 		return -ENOMEM;
 	}
 	ret = platform_driver_register(&hello_driver);
@@ -116,7 +115,7 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
-	printk(KERN_NOTICE "sysfs: %s\n",__FUNCTION__); 
+	pr_notice("sysfs: %s\n", __func__);
 	platform_device_unregister(hello_device);
 	platform_driver_unregister(&hello_driver);
 }
