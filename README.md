@@ -25,3 +25,4 @@ include user api and Linux kernel api
    * [notifier_test](./kernel/notifier_test)
  * [bpf](./bpf)
    * [xdp_drop_world](./bpf/xdp_drop_world)
+   * [xdp_drop_ping](./bpf/xdp_drop_ping)
