@@ -6,7 +6,6 @@ include user api and Linux kernel api
 # Project tree
 
 .
- * [bpf](./bpf)
  * [user](./user)
    * [count1](./user/count1)
    * [file_enc_shell](./user/file_enc_shell)
@@ -24,3 +23,5 @@ include user api and Linux kernel api
    * [list_test](./kernel/list_test)
    * [sysfs_test](./kernel/sysfs_test)
    * [notifier_test](./kernel/notifier_test)
+ * [bpf](./bpf)
+   * [xdp_drop_world](./bpf/xdp_drop_world)
